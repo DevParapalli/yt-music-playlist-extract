@@ -1,65 +1,55 @@
-from selenium import webdriver
+from selenium_bindings import login, get_all_playlist_items, playlist_item_data_extractor, get_playlist_info, stfr_time_to_integer_time
 import json
-
-options = webdriver.ChromeOptions()
-options.add_argument("--user_data_dir=C:\\Users\\Asus\\AppData\\Local\\Google\\Chrome\\User Data")
-driver = webdriver.Chrome(options=options)
-
-input('WaitingForLogin...')
-driver.get('https://music.youtube.com/playlist?list=LM')
-
-input('Scroll to end of playlist...')
-songs_list_html = driver.find_elements_by_tag_name('ytmusic-responsive-list-item-renderer')
-
-# testing different formats
-first_element = songs_list_html[0]
-metadata = first_element.find_elements_by_tag_name('yt-formatted-string')
-# this works 
-
-def get_id_from_url(url) -> str:
-    """gets the media_id, from url
-    watch?v=E3Vyt0Vs_90&list=PLmkPSANbQpO-2oViVfbR-d-Qv6O07T3Vm --> E3Vyt0Vs_90
-
-    Args:
-        url (str): url from the music.youtube.com link for each video
-
-    Returns:
-        media_id: the watch_id of the youtube video
-    """
-    #print(url)
-    _str = url.split('=')[1]
-    __str = _str.split('&')[0]
+# <!-- Constants -->
+PLAYLIST_URL = ""
+PLAYLIST_MAIN = {}
+PLAYLIST_LIST = []
+SKIPPED_LIST = []
+MAX_SONG_DURATION_STFR = "10:00"
+MAX_SONG_DURATION = stfr_time_to_integer_time(MAX_SONG_DURATION_STFR)
+# <!-- Initlization -->
+def init():
+    login(PLAYLIST_URL)
     
-    return __str
+# <!-- Importing globals into this namespace, helps with debugging in any part of the program -->
+def main():
+    global PLAYLIST_MAIN, PLAYLIST_LIST, SKIPPED_LIST
+    input("Waiting for you to scroll to bottom of page.")
+    PLAYLIST_MAIN |= get_playlist_info()
+    playlist_items_list = get_all_playlist_items()
+    i = 0 # <!-- Counter Variable -->
+    for item in playlist_items_list:
+        playlist_item_dict = playlist_item_data_extractor(item)
+        i = i + 1 
+        # <!-- Check Skipping Condition -->
+        if playlist_item_dict['song_duration'] > MAX_SONG_DURATION: 
+            print(f"Skipping {playlist_item_dict.__str__()}")
+            SKIPPED_LIST.append(playlist_item_dict) # <!-- So that data isn't lost -->
+            continue
+        
+        PLAYLIST_LIST.append(playlist_item_dict)
+        if i % 50 == 0 : print(f'Currently at {i}')
 
-def time_in_seconds(formatted_time_string) -> dict:
-    try:
-        minutes, seconds = formatted_time_string.split(':')
-        return (int(minutes) * 60) + int(seconds)
-    except: # <!-- We don't need this all the time lol  -->
-        return 100
+    PLAYLIST_MAIN['playlist'] = PLAYLIST_LIST
+    save(PLAYLIST_MAIN, PLAYLIST_MAIN['playlist_name'])
+    save(SKIPPED_LIST, PLAYLIST_MAIN['playlist_name'] + "_skipped") # <!-- Seperately Saving the details -->
+
+# <!-- Helper Functions -->
+def save(object, filename):
+    save_str = json.dumps(object)
+    with open(filename+".json", "w", encoding='utf-8') as playlist_file:
+        playlist_file.write(save_str)
+        
+
+# <!--  -->
+if __name__ == "__main__":
+    init()
+    main()
     
-def list_item_handler(item):
-    metadata = item.find_elements_by_tag_name('yt-formatted-string')
-    # <!-- Yes, they are in this order and this order only.  -->
-    song_name = metadata[0].text
-    song_link = metadata[0].find_element_by_tag_name('a').get_attribute('href')
-    song_artist = metadata[1].text
-    song_album = metadata[2].text
-    song_duration = time_in_seconds(metadata[3].text) # <!-- We don't need this all the time  -->
-    song_id = get_id_from_url(song_link) #<!-- We save the id only incase we want to use embed or just plain navigate to the page.  -->
     
-    return_dict = {}
-    return_dict['song_name'] = song_name
-    return_dict['song_artist'] = song_artist
-    return_dict['song_id'] = song_id
-    return_dict['song_album'] = song_album
-    return_dict['song_duration'] = song_duration
-    return(return_dict)
-
-list_for_songs_dict = []
-for song in songs_list_html:
-    list_for_songs_dict.append(list_item_handler(song)) #<!-- This is somewhat memory intensive -->
-
-with open('songsLM.json', 'w', encoding='utf-8') as f:
-    print(json.dumps(list_for_songs_dict), file=f) #<!--We save this as a json-file so other scripts can easily access it  -->
+# <!-- TO-DO (in order)-->
+# <!-- 1. Add a dedicated skipping check -->
+    # <!-- 1.1. Skips in term of duration, artists, albums(if blank etc) -->
+    # <!-- 1.2. Artist only mode (export songs of only one artist etc.) -->
+# <!-- 2. Add some prompts for user. -->
+# <!-- 3. Better data storage solution -->
