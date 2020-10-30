@@ -1,6 +1,5 @@
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.common.exceptions import NoSuchElementException
 import urllib.parse
 
 # <!-- Constants -->.
@@ -14,10 +13,10 @@ PLAYLIST_ITEM_CSS = "ytmusic-responsive-list-item-renderer.style-scope.ytmusic-p
 YT_FORMATTED_STRING_CSS = "yt-formatted-string" # <!-- Select inside the above element should have 4 elements -->
 
 # <!-- Not Reliable Method -->
-PLAYLIST_ITEM_TITLE_CSS = "" 
-PLAYLIST_ITEM_ARTIST_CSS = "" 
-PLAYLIST_ITEM_ALBUM_CSS = "" 
-PLAYLIST_ITEM_TIME_CSS = "" 
+PLAYLIST_ITEM_TITLE_CSS = ""
+PLAYLIST_ITEM_ARTIST_CSS = ""
+PLAYLIST_ITEM_ALBUM_CSS = ""
+PLAYLIST_ITEM_TIME_CSS = ""
 
 
 
@@ -45,14 +44,14 @@ def song_url_to_song_id(partial_song_url):
 
 # <!-- Functions that use Selenium -->
 def login(final_url=""):
-    DRIVER.get('https://stackoverflow.com/users/login') # <!-- Need to find a better login option. Preferably my own Oauth2 --> 
+    DRIVER.get('https://stackoverflow.com/users/login') # <!-- Need to find a better login option. Preferably my own Oauth2 -->
     input('Waiting for Google Login...')
     DRIVER.get('https://music.youtube.com')
     print('Login Procedure complete...')
     input('Check Authentication.')
     DRIVER.get(final_url or PLAYLIST_URL)
 
-    
+
 
 def get_all_playlist_items():
     return DRIVER.find_elements_by_css_selector(PLAYLIST_ITEM_CSS) # <!-- Always a list -->

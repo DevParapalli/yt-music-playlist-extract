@@ -10,7 +10,7 @@ MAX_SONG_DURATION = stfr_time_to_integer_time(MAX_SONG_DURATION_STFR)
 # <!-- Initlization -->
 def init():
     login(PLAYLIST_URL)
-    
+
 # <!-- Importing globals into this namespace, helps with debugging in any part of the program -->
 def main():
     global PLAYLIST_MAIN, PLAYLIST_LIST, SKIPPED_LIST
@@ -20,9 +20,9 @@ def main():
     i = 0 # <!-- Counter Variable -->
     for item in playlist_items_list:
         playlist_item_dict = playlist_item_data_extractor(item)
-        i = i + 1 
+        i = i + 1
         # <!-- Check Skipping Condition -->
-        if playlist_item_dict['song_duration'] > MAX_SONG_DURATION: 
+        if playlist_item_dict['song_duration'] > MAX_SONG_DURATION:
             print(f"Skipping {playlist_item_dict.__str__()}")
             SKIPPED_LIST.append(playlist_item_dict) # <!-- So that data isn't lost -->
             continue
@@ -35,8 +35,8 @@ def main():
     save(SKIPPED_LIST, PLAYLIST_MAIN['playlist_name'] + "_skipped") # <!-- Seperately Saving the details -->
 
 # <!-- Helper Functions -->
-def save(object, filename):
-    save_str = json.dumps(object)
+def save(some_object, filename):
+    save_str = json.dumps(some_object)
     with open(filename+".json", "w", encoding='utf-8') as playlist_file:
         playlist_file.write(save_str)
         

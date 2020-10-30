@@ -14,10 +14,11 @@ songs_list_html = driver.find_elements_by_tag_name('ytmusic-responsive-list-item
 # testing different formats
 first_element = songs_list_html[0]
 metadata = first_element.find_elements_by_tag_name('yt-formatted-string')
-# this works 
+# this works
 
 def get_id_from_url(url) -> str:
     """gets the media_id, from url
+
     watch?v=E3Vyt0Vs_90&list=PLmkPSANbQpO-2oViVfbR-d-Qv6O07T3Vm --> E3Vyt0Vs_90
 
     Args:
@@ -29,14 +30,14 @@ def get_id_from_url(url) -> str:
     #print(url)
     _str = url.split('=')[1]
     __str = _str.split('&')[0]
-    
+
     return __str
 
 def time_in_seconds(formatted_time_string) -> dict:
     try:
         minutes, seconds = formatted_time_string.split(':')
         return (int(minutes) * 60) + int(seconds)
-    except: # <!-- We don't need this all the time lol  -->
+    except ValueError: # <!-- We don't need this all the time lol  -->
         return 100
     
 def list_item_handler(item):
