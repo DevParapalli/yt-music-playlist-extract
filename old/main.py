@@ -33,7 +33,7 @@ def get_id_from_url(url) -> str:
 
     return __str
 
-def time_in_seconds(formatted_time_string) -> dict:
+def time_in_seconds(formatted_time_string) -> int:
     try:
         minutes, seconds = formatted_time_string.split(':')
         return (int(minutes) * 60) + int(seconds)
